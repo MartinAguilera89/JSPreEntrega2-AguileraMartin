@@ -1,71 +1,83 @@
-// SITIO PARA SOCIOS DE UN CLUB
+//Socios de un club para saber condicion de pagos de cuotas.
 
 function validarNumero(numero, mensaje){
     while(isNaN(numero)){
-        alert("No ingresaste un valor numerico valido. Intentar nuevamente")
+        alert("Ingresaste un valor no numerico, reintentalo")
         numero = parseInt(prompt(mensaje));
     } 
     return numero;
 }
-//Class constructor objetos Socio
+
 class Socio{
-    constructor(id, apellido, nroSocio){
+    constructor(id, nombre, nroSocio){
         this.id = id,
-        this.apellido = apellido,
+        this.nombre = nombre,
         this.nroSocio = nroSocio,
         this.cuotas = [],
-        this.condicion = ""
+        this.abono = ""
     }
 }
 
-const socio1 = new Socio(1,"Gonzalez Federico", 4500)
-const socio2 = new Socio(2,"Garcia Roberto", 3200)
-const socio3 = new Socio(3,"Ramirez Alan", 1700)
-const socio4 = new Socio(4,"Lopez Lorena", 5100)
+class Cuotas{
+    constructor(pago){
+        this.pago = pago,
+        this.fecha = new Date()
+    }
+}
 
-const SOCIOS = [socio1,socio2,socio3,socio4];
+const socio1 = new Socio(1,"Raul Ramirez", 10001)
+const socio2 = new Socio(2,"Luis Luque", 10002)
+const socio3 = new Socio(3,"Gaston Gonzalez", 10003)
+const socio4 = new Socio(4,"Fernando Fernandez", 10004)
+const socio5 = new Socio(5,"Martin Martinez", 10005)
 
+const SOCIOS = [socio1,socio2,socio3,socio4,socio5]; 
 
-function inicioRegistro(){
-//     //Creamos mensaje inicial a mostrar
-    let mensajeRegistro = "Estos son los socios registrados; Selecciona tu ID para reservar tu proxima entrada \n";
+function mensajeSocios(){
+    let mensajePresentacion = "Estos son nuestros socios; ingrese ID para evaluar condicion: \n";
     SOCIOS.forEach(e => {
-        mensajeRegistro += `${e.id} - ${e.apellido} nro de socio ${e.nroSocio} \n` 
+        mensajePresentacion += `${e.id} - ${e.nombre} nro de socio del club ${e.nroSocio} \n` 
     })
 
-    let respuestaSocio = parseInt(prompt(mensajeRegistro));
-    respuestaSocio = validarNumero(respuestaSocio, mensajeRegistro)
+    let respuestaSocio = parseInt(prompt(mensajePresentacion));
+    respuestaSocio = validarNumero(respuestaSocio, mensajePresentacion)
     return SOCIOS.find(elem => elem.id === respuestaSocio);
 }
 
-function revisionAbono(socio){
-    if (socio.cuotas.length == 3){ return alert("El Socio se encuentra al dia con el abono. Puede reservar entradas para los proximos partidos")}
+mensajeSocios()
 
-    let abono = parseInt(prompt(`Ingrese el nro de bimestre ${socio.cuotas.length + 1 } abonado por el socio ${socio.apellido} \n 1 - enero/febrero \n 2 - marzo/abril \n 3 - mayo/junio 8 - NO ABONE NINGUN BIMESTRE MAS \n 9 - NO TENGO NINGUN BIMESTRE ABONADO EN EL AÑO `))
-    abono = validarNumero(abono, `Ingrese el nro de bimestre ${socio.cuotas.length + 1 } abonado por el socio ${socio.apellido} \n 1 - enero/febrero \n 2 - marzo/abril \n 3 - mayo/junio 8 - NO ABONE NINGUN BIMESTRE MAS \n 9 - NO TENGO NINGUN BIMESTRE ABONADO EN EL AÑO ` )
-    socio.cuotas.push(abono)
+function pagoCuota(socio){
+    if (socio.cuotas.length == 3){return alert("El Socio ya tiene sus 3 cuotas pagas, tiene abono activo.")}
+    let pago = parseInt(prompt(`Ingrese el valor de cuota numero ${socio.cuotas.length + 1 } del socio ${socio.nombre}`))
+    pago = validarNumero(pago, `Ingrese el valor de cuota numero ${socio.cuotas.length + 1 } del socio ${socio.nombre}` )
+    socio.cuotas.push(new Cuotas(pago))
 }
 
-function revisionCondicion(socio){
+const socioSeleccionado = mensajeSocios()
+pagoAbono(socioSeleccionado);
+
+pagoCuota(socioSeleccionado);
+pagoCuota(socioSeleccionado);
+pagoCuota(socioSeleccionado);
+
+function pagoAbono(socio){
     if(socio.cuotas.length < 3 ){
-        alert("Debe ingresar si tiene los abonos realizados")
+        alert("Para ser condicion Abonado Activo, debes ingresar las 3 cuotas")
         return
     }
 
-    //Evalua la condicion del socio
-
-    let abonos = socio.cuotas.reduce((acumulador, elemento) => {
-        return acumulador += elemento.abono;
+    let pagos = socio.cuotas.reduce((acumulador, elemento) => {
+        return acumulador += elemento.pago;
     }, 0)
 
-    let statusRegitro = abonos/socio.cuotas.length;
+    let condicion = pagos/socio.cuotas.length;
 
-    if (statusRegitro == 6){
-        socio.condicion = "Tu condicion de socio es ACTIVO: podes sacar entradas para cualquier partido del mes"
-    }else if(statusRegitro > 6){
-        socio.condicion = "Tu condicion de socio es CADETE: podes sacar entrada solamente para el siguiente partido, debes ponerte al dia con los abonos"
+    if (condicion >= 1500){
+        socio.abono = "Abonado Activo"
+    }else if(condicion >= 1){
+        socio.abono = "Abonado Inactivo; Falta ponerse al dia con las cuotas"
     }else{
-        socio.condicion = "Tu condicion de socio es INACTIVO: NO podes sacar entradas, debes ponerte al dia con los pagos."
+        socio.abono = "Abono dado de baja; no pago ninguna cuota"
     }
-}
 
+}
